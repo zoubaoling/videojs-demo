@@ -26,6 +26,7 @@ import videojs from 'video.js'
 import 'videojs-contrib-hls'
 import 'videojs-flash'
 import 'video.js/dist/video-js.css'
+// import 'videojs-swf/dist/video-js.swf'
 export default {
   name: 'HelloWorld',
   props: {
@@ -47,20 +48,15 @@ export default {
         sources: [
           // {
           //   src:
-          //     'https://www.sicau.edu.cn/__local/A/1E/52/E8093449CF93AF4E8960C131C04_09BD5DD1_1F12F030.mp4?e=.mp4', // 路径
-          //   type: 'video/mp4' // 类型
+          //     'http://playertest.longtailvideo.com/adaptive/bipbop/gear4/prog_index.m3u8',
+          //   type: 'application/x-mpegURLs'
+          //   // withCredentials: true
           // }
           {
-            src:
-              'http://playertest.longtailvideo.com/adaptive/bipbop/gear4/prog_index.m3u8',
-            type: 'application/x-mpegURLs'
-            // withCredentials: true
+            src: 'rtmp://ns8.indexforce.com/home/mystream',
+            // type: 'rtmp/mp4'
+            type: 'rtmp/flv'
           }
-          // {
-          //   src: 'rtmp://ns8.indexforce.com/home/mystream',
-          //   type: 'rtmp/mp4'
-          //   // type: 'rtmp/flv'
-          // }
         ],
         poster: '',
         // 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3612873308,1721476889&fm=26&gp=0.jpg', // 你的封面地址
@@ -71,12 +67,52 @@ export default {
           durationDisplay: true,
           remainingTimeDisplay: false,
           fullscreenToggle: true // 全屏按钮
+        },
+        // flash: {
+        //   // swf: 'videojs-swf/dist/video-js.swf'
+        //   swf: './video-js.swf'
+        // },
+        techOrder: ['flash']
+      }
+    }
+  },
+  methods: {
+    flash() {
+      var hasFlash = 0 //是否安装了flash
+      var flashVersion = 0 //flash版本
+      var isIE = /*@cc_on!@*/ 0 //是否IE浏览器
+      if (isIE) {
+        // var swf = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+        // if (swf) {
+        //     hasFlash = 1;
+        //     VSwf = swf.GetVariable("$version");
+        //     flashVersion = parseInt(VSwf.split(" ")[1].split(",")[0]);
+        // }
+      } else {
+        if (navigator.plugins && navigator.plugins.length > 0) {
+          var swf = navigator.plugins['Shockwave Flash']
+          if (swf) {
+            hasFlash = 1
+            var words = swf.description.split(' ')
+            for (var i = 0; i < words.length; ++i) {
+              if (isNaN(parseInt(words[i]))) continue
+              flashVersion = parseInt(words[i])
+            }
+          }
         }
       }
+      return { f: hasFlash, v: flashVersion }
     }
   },
   mounted() {
     this.$nextTick(() => {
+      // videojs.options.flash.swf = './video-js.swf'
+      videojs.options.flash = {
+        swf: './video-js.swf'
+      }
+      console.log(videojs.options)
+      const a = this.flash()
+      console.log(a)
       this.videoObj = videojs('myVideo', this.playerOptions, function() {
         console.log(this)
         // this.play()
